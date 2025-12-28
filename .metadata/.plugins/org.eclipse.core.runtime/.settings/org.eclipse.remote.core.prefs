@@ -1,0 +1,11 @@
+connections/org.eclipse.remote.serial.core.connectionType/Timer_3_task/serial.baudRate=11
+connections/org.eclipse.remote.serial.core.connectionType/Timer_3_task/serial.byteSize=3
+connections/org.eclipse.remote.serial.core.connectionType/Timer_3_task/serial.parity=0
+connections/org.eclipse.remote.serial.core.connectionType/Timer_3_task/serial.portName=COM3
+connections/org.eclipse.remote.serial.core.connectionType/Timer_3_task/serial.stopBits=0
+connections/org.eclipse.remote.serial.core.connectionType/Timer_task_3/serial.baudRate=11
+connections/org.eclipse.remote.serial.core.connectionType/Timer_task_3/serial.byteSize=3
+connections/org.eclipse.remote.serial.core.connectionType/Timer_task_3/serial.parity=0
+connections/org.eclipse.remote.serial.core.connectionType/Timer_task_3/serial.portName=COM3
+connections/org.eclipse.remote.serial.core.connectionType/Timer_task_3/serial.stopBits=0
+eclipse.preferences.version=1

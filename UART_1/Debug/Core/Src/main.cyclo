@@ -1,0 +1,5 @@
+../Core/Src/main.c:10:5:main	1
+../Core/Src/main.c:18:13:uart_config	1
+../Core/Src/main.c:32:13:timer_config	1
+../Core/Src/main.c:47:13:nvic_config	1
+../Core/Src/main.c:55:6:TIM2_IRQHandler	3

@@ -1,0 +1,32 @@
+/*
+ * Sending Characters Using UART
+ */
+#include"stm32f4xx.h"
+
+static void uart_config(void);
+
+int main(void)
+{
+	uart_config();
+	while(1)
+	{
+		if(USART2->SR & (1U << 6))
+		{
+			USART2->DR = 101;
+		}
+	}
+}
+
+static void uart_config(void)
+{
+	//clock for UART2
+	RCC->APB1ENR |= (1U << 13);
+	(void)RCC->APB1ENR;
+
+	USART2->CR1 &= ~(1U << 13);  //disabled uart to configure
+	USART2->CR1 |= (1U << 6);     //Enabling the interrput when transmission complete
+
+	USART2->BRR = 833.3125;      //configuring Buadrate
+
+	USART2->CR1 |= (1U <<13);    //Enable the UART2
+}
