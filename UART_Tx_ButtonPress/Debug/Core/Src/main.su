@@ -1,0 +1,10 @@
+../Core/Src/main.c:24:5:__io_putchar	16	static
+../Core/Src/main.c:30:5:main	40	static
+../Core/Src/main.c:71:13:uart_config	16	static
+../Core/Src/main.c:102:13:gpio_config	4	static
+../Core/Src/main.c:118:17:Baudrate_config	16	static
+../Core/Src/main.c:125:13:Uart_tx	16	static
+../Core/Src/main.c:134:13:timer_config	8	static
+../Core/Src/main.c:157:13:nvic_config	4	static
+../Core/Src/main.c:168:14:cal_fun	16	static
+../Core/Src/main.c:182:6:TIM2_IRQHandler	4	static
