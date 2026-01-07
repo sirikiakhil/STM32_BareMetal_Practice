@@ -1,0 +1,140 @@
+#include "spi.h"
+
+/*
+    SPI LOOPBACK CONNECTIONS (external wires)
+
+    SPI1 (MASTER) - GPIOA
+    PA5 -> SCK
+    PA6 -> MISO
+    PA7 -> MOSI
+    PA3 -> Manual CS (GPIO output)
+
+    SPI2 (SLAVE) - GPIOB
+    PB13 -> SCK
+    PB14 -> MISO
+    PB15 -> MOSI
+
+    NOTE:
+    - SPI1 generates clock
+    - SPI2 responds as slave
+    - NSS is handled using software (SSM + SSI)
+*/
+
+/************************************************************/
+
+void spi1_gpio_config(void)
+{
+    // Enable GPIOA clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+
+    /*
+        PA5, PA6, PA7 -> Alternate Function mode
+        These pins are controlled by SPI hardware
+    */
+    GPIOA->MODER &= ~((3U<<10)|(3U<<12)|(3U<<14));
+    GPIOA->MODER |=  ((2U<<10)|(2U<<12)|(2U<<14));
+
+    // Select AF5 for SPI1
+    GPIOA->AFR[0] |= (5U<<20)|(5U<<24)|(5U<<28);
+
+    /*
+        PA3 -> GPIO output
+        Used as manual CS (only for practice)
+    */
+    GPIOA->MODER &= ~(3U<<6);
+    GPIOA->MODER |=  (1U<<6);
+
+    // CS HIGH initially (slave not selected)
+    GPIOA->ODR |= (1U<<3);
+}
+
+/************************************************************/
+
+void spi2_gpio_config(void)
+{
+    // Enable GPIOB clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN;
+
+    /*
+        PB13, PB14, PB15 -> Alternate Function mode
+        These pins are used by SPI2
+    */
+    GPIOB->MODER &= ~((3U<<26)|(3U<<28)|(3U<<30));
+    GPIOB->MODER |=  ((2U<<26)|(2U<<28)|(2U<<30));
+
+    // Select AF5 for SPI2
+    GPIOB->AFR[1] |= (5U<<20)|(5U<<24)|(5U<<28);
+}
+
+/************************************************************/
+
+void spi1_config(void)
+{
+    // Enable SPI1 peripheral clock
+    RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
+
+    // Clear CR1 before configuration
+    SPI1->CR1 = 0;
+
+    // Configure SPI1 as MASTER
+    SPI1->CR1 |= SPI_CR1_MSTR;
+
+    // Baud rate selection (PCLK / 4)
+    SPI1->CR1 |= SPI_CR1_BR_0;
+
+    // CPOL = 1, CPHA = 1 (must match slave)
+    SPI1->CR1 |= SPI_CR1_CPOL;
+    SPI1->CR1 |= SPI_CR1_CPHA;
+
+    /*
+        Software NSS
+        - Prevents MODF error
+        - SPI internally assumes NSS = HIGH
+    */
+    SPI1->CR1 |= SPI_CR1_SSM;
+    SPI1->CR1 |= SPI_CR1_SSI;
+
+    // Enable SPI1
+    SPI1->CR1 |= SPI_CR1_SPE;
+}
+
+/************************************************************/
+
+void spi2_config(void)
+{
+    // Enable SPI2 peripheral clock
+    RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
+
+    // Clear CR1 before configuration
+    SPI2->CR1 = 0;
+
+    // CPOL and CPHA must match master
+    SPI2->CR1 |= SPI_CR1_CPOL;
+    SPI2->CR1 |= SPI_CR1_CPHA;
+
+    /*
+        Software NSS used here
+        NOTE:
+        This is OK for loopback learning
+        Real SPI slave should use hardware NSS
+    */
+    SPI2->CR1 |= SPI_CR1_SSM;
+    SPI2->CR1 |= SPI_CR1_SSI;
+
+    // Enable SPI2
+    SPI2->CR1 |= SPI_CR1_SPE;
+}
+
+/************************************************************/
+
+void cs_enable(void)
+{
+    // Pull CS LOW
+    GPIOA->ODR &= ~(1U<<3);
+}
+
+void cs_disable(void)
+{
+    // Pull CS HIGH
+    GPIOA->ODR |= (1U<<3);
+}

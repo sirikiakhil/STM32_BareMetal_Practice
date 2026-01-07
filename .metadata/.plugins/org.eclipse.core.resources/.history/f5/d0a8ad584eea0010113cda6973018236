@@ -1,0 +1,9 @@
+#include "SPI.h"
+
+
+void spi1_config(void)
+{
+
+}
+
+

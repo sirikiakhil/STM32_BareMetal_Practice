@@ -1,0 +1,118 @@
+
+#include "SPI.h"
+
+/*
+	PA5 -> SPI1_SCK
+	PA6 -> SPI1_MISO
+	PA7 -> SPI1_MOSI
+	For selecting slave(CS) we can use any pin so PA9
+*/
+
+void spi1_gpio_config(void)
+{
+	//Configuring GPIOA (SPI1 connected to GPIOA)
+
+
+	//AHB1ENR is clock bus for GPIOA
+	RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOAEN);
+	(void)RCC->AHB1ENR;
+
+	//SPI1 is connected to PA4,PA5,PA6,PA7
+
+	//configuration of PA4,PA5,PA6 pins (MOSI, MISO, SCK)
+	GPIOA->MODER &= ~((3U << 10) | (3U << 12) | (3U << 14));
+	GPIOA->MODER |=  ((2U << 10) | (2U << 12) | (2U << 14));  //configuring as Alternative Functin Mode
+
+	//configuration of AFL register for PA4,PA5,PA6
+	GPIOA->AFR[0] &=  ~((15 << 16) | (15 << 20) | (15 << 24));
+	GPIOA->AFR[0] |=   ((5 << 16) | (5 << 20) | (5 << 24));
+
+	//configurtaion of PA7 (Because We need to set the pin high and low)
+	GPIOA->MODER &= ~(3 << 6);
+	GPIOA->MODER |=  (1 << 6);                   //configuring PA3 for CS(chip select)
+
+}
+
+/************************************************************/
+
+void spi1_config(void)
+{
+	//configuring SPI1
+
+	SPI1->CR1 &= ~(SPI_CR1_SPE);
+
+	SPI1->CR1 |= (1U << 3);
+
+	SPI1->CR1 |= (SPI_CR1_CPOL);
+	SPI1->CR1 |= (SPI_CR1_CPHA);
+
+	SPI1->CR1 &= ~(SPI_CR1_LSBFIRST);     //send MSB first
+
+	SPI1->CR1 &= ~(1U<<11);               //8-bit data mode
+
+
+	SPI1->CR1 |= (SPI_CR1_MSTR);          //configuring as MASTER
+
+	SPI1->CR1 |= (SPI_CR1_SSM);
+	SPI1->CR1 |= (SPI_CR1_SSI);
+
+	SPI1->CR1 |= (SPI_CR1_SPE);
+}
+
+void spi2_gpio_config(void)
+{
+	//Configuring GPIOB (SPI2 connected to GPIOB)
+
+
+		//AHB1ENR is clock bus for GPIOA
+		RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOBEN);
+		(void)RCC->AHB1ENR;
+
+		//SPI1 is connected to PA4,PA5,PA6,PA7
+
+		//configuration of PA4,PA5,PA6 pins (MOSI, MISO, SCK)
+		GPIOB->MODER &= ~((3U << 8) | (3U << 10) | (3U << 12));
+		GPIOB->MODER |=  ((2U << 8) | (2U << 10) | (2U << 12));  //configuring as Alternative Functin Mode
+
+		//configuration of AFL register for PA4,PA5,PA6
+		GPIOB->AFR[1] &=  ~((15 << 20) | (15 << 24) | (15 << 28));
+		GPIOB->AFR[1] |=   ((5 << 20) | (5 << 24) | (5 << 28));
+
+}
+
+
+/************************************************************/
+
+void spi2_config(void)
+{
+		//configuring SPI1
+
+		SPI2->CR1 &= ~(SPI_CR1_SPE);
+
+		//no need to set the buardrate at slave
+
+		SPI2->CR1 |= (SPI_CR1_CPOL);
+		SPI2->CR1 |= (SPI_CR1_CPHA);
+
+		SPI2->CR1 &= ~(SPI_CR1_LSBFIRST);     //send MSB first
+
+		SPI2->CR1 &= ~(1U<<11);               //8-bit data mode
+
+		SPI2->CR1 &= ~(SPI_CR1_MSTR);          //configuring as Slave
+
+		SPI2->CR1 |= (SPI_CR1_SSM);
+		SPI2->CR1 |= (SPI_CR1_SSI);
+
+		SPI2->CR1 |= (SPI_CR1_SPE);
+}
+
+
+void cs_enable(void)
+{
+	GPIOA->ODR &= ~(1U << 3);
+}
+
+void cs_disable(void)
+{
+	GPIOA->ODR |= (1U << 3);
+}

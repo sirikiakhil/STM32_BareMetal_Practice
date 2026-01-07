@@ -1,0 +1,9 @@
+
+#include "SPI.h"
+
+int main(void)
+{
+	spi1_config();
+	spi2_config();
+
+}

@@ -1,0 +1,16 @@
+
+#include "SPI.h"
+
+uint8_t spi1_tx_data[3]= {0x88, 0x99};  //0x88 -> because we took 8 bit (1000 1000) ,for 0x99 (1001 1001)
+uint8_t spi2_rx_data[3];
+
+
+int main(void)
+{
+	spi1_gpio_config();
+	spi2_gpio_config();
+
+	spi1_config();
+	spi2_config();
+
+}

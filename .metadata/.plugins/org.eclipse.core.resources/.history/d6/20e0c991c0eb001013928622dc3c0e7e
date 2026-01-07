@@ -1,0 +1,101 @@
+// main.c
+// SPI1 (MASTER) <-> SPI2 (SLAVE) loopback example
+
+#include "spi.h"
+
+/*
+    On Nucleo-F446RE:
+    User LED (LD2) is connected to PA5
+*/
+static void led_config(void);
+
+int main(void)
+{
+    // Data to be transmitted by SPI1
+    uint8_t spi1_tx_data[3] = {0x77, 0x88, 0x99};
+
+    // Data received by SPI2
+    uint8_t spi2_rx_data[3];
+
+    /*
+        IMPORTANT RULE:
+        Slave must be initialized BEFORE master
+        Otherwise slave may miss clock edges
+    */
+    spi2_gpio_config();
+    spi2_config();
+
+    spi1_gpio_config();
+    spi1_config();
+
+    led_config();
+
+    /*
+        Preload SPI2 data register
+        Slave shifts data out while receiving data
+    */
+    SPI2->DR = 0xFF;
+
+    // Enable CS (for discipline only)
+    cs_enable();
+
+    for(uint8_t i = 0; i < 3; i++)
+    {
+        // Wait until SPI1 TX buffer is empty
+        while(!(SPI1->SR & SPI_SR_TXE));
+
+        // Writing DR starts SPI clock
+        SPI1->DR = spi1_tx_data[i];
+
+        // Wait until SPI2 receives data
+        while(!(SPI2->SR & SPI_SR_RXNE));
+
+        // Read data received by SPI2
+        spi2_rx_data[i] = SPI2->DR;
+
+        // Clear SPI1 RX buffer (full duplex)
+        while(!(SPI1->SR & SPI_SR_RXNE));
+        (void)SPI1->DR;
+    }
+
+    // Disable CS
+    cs_disable();
+
+    // Wait until SPI1 is no longer busy
+    while(SPI1->SR & SPI_SR_BSY);
+
+    /*
+        Verify loopback result
+        If all bytes match -> LED ON
+    */
+    uint8_t match = 1;
+    for(uint8_t i = 0; i < 3; i++)
+    {
+        if(spi1_tx_data[i] != spi2_rx_data[i])
+        {
+            match = 0;
+            break;
+        }
+    }
+
+    if(match)
+    {
+        GPIOA->ODR |= (1U<<5);   // LED ON
+    }
+    else
+    {
+        GPIOA->ODR &= ~(1U<<5);  // LED OFF
+    }
+
+    while(1);
+}
+
+static void led_config(void)
+{
+    // Enable GPIOA clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+
+    // PA5 as output
+    GPIOA->MODER &= ~(3U<<10);
+    GPIOA->MODER |=  (1U<<10);
+}

@@ -60,8 +60,8 @@ all: main-build
 main-build: EXTI__1.elf secondary-outputs
 
 # Tool invocations
-EXTI__1.elf EXTI__1.map: $(OBJS) $(USER_OBJS) C:\Users\akhil\Stm_32_programmes\Target\EXTI__1\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "EXTI__1.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\akhil\Stm_32_programmes\Target\EXTI__1\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="EXTI__1.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+EXTI__1.elf EXTI__1.map: $(OBJS) $(USER_OBJS) C:\Users\akhil\STM32_BareMetal_Practice\EXTI__1\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "EXTI__1.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\akhil\STM32_BareMetal_Practice\EXTI__1\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="EXTI__1.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
