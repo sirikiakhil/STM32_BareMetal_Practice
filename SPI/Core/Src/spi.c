@@ -92,9 +92,9 @@ void spi2_gpio_config(void)
     /*
         SPI2 pins:
         PB13 -> SCK
-        PB14 -> MISO
+        PB14 ->MISO
         PB15 -> MOSI
-        Set to AF mode (AF5).
+        Set to AF mode (AF5)
     */
     GPIOB->MODER &= ~((3U << 8) | (3U << 10) | (3U << 12));
     GPIOB->MODER |=  ((2U << 8) | (2U << 10) | (2U << 12));
@@ -106,7 +106,7 @@ void spi2_gpio_config(void)
         NOTE:
         SPI2_NSS (PB12) is NOT configured.
         Because SPI2 uses Software NSS (SSM + SSI),
-        SPI2 hardware ignores the NSS pin completely.
+        SPI2 hardware ignores the NSS pin completely
     */
 }
 
@@ -116,7 +116,7 @@ void spi2_config(void)
 {
     /*
         ADDED:
-        Enable SPI2 peripheral clock.
+        Enable SPI2 peripheral clock
     */
     RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
     (void)RCC->APB1ENR;
@@ -157,9 +157,9 @@ void spi2_config(void)
 void cs_enable(void)
 {
     /*
-        Pull CS LOW.
-        Required for real SPI devices.
-        Here it is kept for SPI practice and future compatibility.
+        Pull CS LOW
+        Required for real SPI devices
+        Here it is kept for SPI practice and future compatibility
     */
     GPIOA->ODR &= ~(1U << 3);
 }
@@ -167,8 +167,8 @@ void cs_enable(void)
 void cs_disable(void)
 {
     /*
-        Pull CS HIGH.
-        Marks end of SPI transaction.
+        Pull CS HIGH
+        Marks end of SPI transaction
     */
     GPIOA->ODR |= (1U << 3);
 }

@@ -1,7 +1,5 @@
 #include "SPI.h"
 
-static void led_config_spimode(void);
-
 /************************************************************/
 
 int main(void)
@@ -17,10 +15,6 @@ int main(void)
 	spi1_gpio_config();
 	spi1_config();   //SPI1 as MASTER
 
-
-
-	//Configure LED pin
-	led_config_spimode();
 
 
 	//Transmit data from SPI1 (MASTER)
@@ -44,8 +38,6 @@ int main(void)
 
 	for(uint8_t i = 0; i < 3; i++)
 	{
-
-
 		//Wait until SPI1 transmit buffer is empty
 		while(!(SPI1->SR & SPI_SR_TXE)){}
 
@@ -90,31 +82,9 @@ int main(void)
 	while(1)
 	{
 		/*
-			Simple verification:
-			If transmitted data matches received data,
-			turn ON LED.
+		 * we use LED or UArt to verifiy
 		*/
-		for(uint8_t i = 0; i < 3; i++)
-		{
-			if(spi1_tx_data[i] == spi2_rx_data[i])
-			{
-				GPIOA->ODR |= (1U << 9);
-			}
-		}
-
-		for(uint32_t i = 0; i < 2000000; i++);
-
 	}
 }
 
 /************************************************************/
-
-static void led_config_spimode(void)
-{
-	RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOAEN);
-	(void)RCC->AHB1ENR;
-
-	// Configure PA9 as output (LED)
-	GPIOA->MODER &= ~(3U << 18);
-	GPIOA->MODER |=  (1U << 18);
-}
