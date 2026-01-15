@@ -1,3 +1,5 @@
+// main.c
+
 #include "SPI.h"
 
 static void led_config_spimode(void);
@@ -96,7 +98,7 @@ int main(void)
 		*/
 		for(uint8_t i = 0; i < 3; i++)
 		{
-			if(spi1_tx_data[i] == spi2_rx_data[i])
+			if(spi1_tx_data[i] != spi2_rx_data[i])
 			{
 				GPIOA->ODR |= (1U << 9);
 			}

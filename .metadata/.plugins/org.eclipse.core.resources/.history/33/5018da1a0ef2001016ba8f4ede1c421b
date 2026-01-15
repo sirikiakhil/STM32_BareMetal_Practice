@@ -1,3 +1,5 @@
+// main.c
+
 #include "SPI.h"
 
 static void led_config_spimode(void);

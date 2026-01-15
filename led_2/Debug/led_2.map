@@ -3004,13 +3004,13 @@ LOAD C:/ST/STM32CubeIDE_1.19.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_line    0x000016f2       0x7a ./Core/Startup/startup_stm32f446retx.o
  .debug_line    0x0000176c      0xa07 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
 
-.debug_str      0x00000000    0xc3307
- .debug_str     0x00000000    0xc3307 ./Core/Src/main.o
+.debug_str      0x00000000    0xc333b
+ .debug_str     0x00000000    0xc333b ./Core/Src/main.o
                               0xc26d2 (size before relaxing)
- .debug_str     0x000c3307    0xc273a ./Core/Src/stm32f4xx_it.o
- .debug_str     0x000c3307    0xc2763 ./Core/Src/system_stm32f4xx.o
- .debug_str     0x000c3307       0x78 ./Core/Startup/startup_stm32f446retx.o
- .debug_str     0x000c3307    0xc3328 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
+ .debug_str     0x000c333b    0xc273a ./Core/Src/stm32f4xx_it.o
+ .debug_str     0x000c333b    0xc2763 ./Core/Src/system_stm32f4xx.o
+ .debug_str     0x000c333b       0x78 ./Core/Startup/startup_stm32f446retx.o
+ .debug_str     0x000c333b    0xc3328 ./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.o
 
 .comment        0x00000000       0x43
  .comment       0x00000000       0x43 ./Core/Src/main.o

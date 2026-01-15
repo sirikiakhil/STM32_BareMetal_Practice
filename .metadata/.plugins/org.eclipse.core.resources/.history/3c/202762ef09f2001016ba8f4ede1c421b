@@ -1,0 +1,55 @@
+/*
+ * LED ON when button pressed ,OFF when not pressed (relesed)
+ */
+#include "stm32f4xx.h"
+
+static void gpio_config(void);
+
+int main(void)
+{
+	gpio_config();
+	while(1)                                                      //infinte loop
+	{
+		if(!(GPIOC->IDR & (1U << 13)))
+		{
+			for(volatile uint32_t count=0;count<20000;count++);   //delay to overcome bouncing effect
+			if(!(GPIOC->IDR & (1U << 13)))
+			{
+				GPIOA->BSRR = (1U << 9);                           //LED on
+
+				while(!(GPIOC->IDR & (1U << 13)));                    //wait untile switch relese
+				GPIOA->BSRR = (1U <<(9+16));                       //LED off
+			}
+		}
+	}
+
+}
+
+static void gpio_config(void)
+{
+	    // GPIOA is on AHB1 bus
+		RCC->AHB1ENR |=RCC_AHB1ENR_GPIOAEN ;      //Enableing the clock for GPIO
+
+		// GPIOC is on AHB1 bus
+		RCC->AHB1ENR |=RCC_AHB1ENR_GPIOCEN ;      //Enableing the clock for GPIOA
+		(void)RCC->AHB1ENR;                       // read-back to ensure clock is active
+		//-------------------------------------
+
+		GPIOA->MODER &= ~(3U << 18);             //Clearing the moder PA5 bits
+		GPIOA->MODER |= (1U << 18);              // setting the moder  PA5 bits as output configuration
+
+		GPIOA->OTYPER &= ~(1U << 9);               //Push -Pull type
+
+		GPIOA->OSPEEDR &= ~(3U << 18);           //Clearing the output speed PA5 bits
+
+		GPIOA->PUPDR &= ~(3U << 18);            //Clearing the PA5 PUPDR bits
+		//--------------------------------------
+
+		GPIOC->MODER &= ~(3U << 26);             //Clearing the moder PC13 bits to config as input mode
+
+		GPIOC->OSPEEDR &= ~(3U << 26);           //Clearing the output speed PC13 bits to set  low speed
+
+		GPIOC->PUPDR &= ~(3U << 26);            //Clearing the PC13 PUPDR bits
+		GPIOC->PUPDR |= (1U << 26);             // config as pull-up
+
+}

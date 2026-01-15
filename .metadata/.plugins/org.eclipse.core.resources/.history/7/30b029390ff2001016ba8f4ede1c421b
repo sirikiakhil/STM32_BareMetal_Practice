@@ -1,0 +1,134 @@
+#include "stm32f4xx.h"
+
+/* ------------------ Function Prototypes ------------------ */
+void clock_init(void);
+void led_init(void);
+void led_on(void);
+void led_off(void);
+
+void spi1_gpio_init(void);
+void spi2_gpio_init(void);
+
+void spi1_init(void);
+void spi2_init(void);
+
+uint8_t spi_transfer(uint8_t data);
+
+/* ------------------ Clock Init ------------------ */
+void clock_init(void)
+{
+    RCC->AHB1ENR |= (1 << 0);   // GPIOA
+    RCC->AHB1ENR |= (1 << 1);   // GPIOB
+
+    RCC->APB2ENR |= (1 << 12);  // SPI1
+    RCC->APB1ENR |= (1 << 14);  // SPI2
+}
+
+/* ------------------ LED Init (PA5) ------------------ */
+void led_init(void)
+{
+	RCC->AHB1ENR |= (1 << 0);   // GPIOA
+    GPIOA->MODER &= ~(3 << 18);
+    GPIOA->MODER |=  (1 << 18);   // Output mode
+}
+
+void led_on(void)
+{
+
+	RCC->AHB1ENR |= (1 << 0);   // GPIOA
+    GPIOA->ODR |= (1 << 9);
+}
+
+void led_off(void)
+{
+    GPIOA->ODR &= ~(1 << 9);
+}
+
+/* ------------------ SPI GPIO Init ------------------ */
+/* SPI1: PA4 NSS, PA5 SCK, PA6 MISO, PA7 MOSI */
+void spi1_gpio_init(void)
+{
+    GPIOA->MODER &= ~(0xFF << 8);
+    GPIOA->MODER |=  (0xAA << 8);   // Alternate function
+
+    GPIOA->AFR[0] |= (5 << 16); // PA4
+    GPIOA->AFR[0] |= (5 << 20); // PA5
+    GPIOA->AFR[0] |= (5 << 24); // PA6
+    GPIOA->AFR[0] |= (5 << 28); // PA7
+}
+
+/* SPI2: PB12 NSS, PB13 SCK, PB14 MISO, PB15 MOSI */
+void spi2_gpio_init(void)
+{
+    GPIOB->MODER &= ~(0xFF << 24);
+    GPIOB->MODER |=  (0xAA << 24);
+
+    GPIOB->AFR[1] |= (5 << 16); // PB12
+    GPIOB->AFR[1] |= (5 << 20); // PB13
+    GPIOB->AFR[1] |= (5 << 24); // PB14
+    GPIOB->AFR[1] |= (5 << 28); // PB15
+}
+
+/* ------------------ SPI Init ------------------ */
+/* SPI1 → MASTER */
+void spi1_init(void)
+{
+    SPI1->CR1 =
+        (1 << 2) |     // Master
+        (3 << 3) |     // Baud rate = fPCLK/16
+        (1 << 8) |     // SSI
+        (1 << 9);      // SSM
+
+    SPI1->CR1 |= (1 << 6);  // SPI Enable
+}
+
+/* SPI2 → SLAVE */
+void spi2_init(void)
+{
+    SPI2->CR1 = 0;          // Slave mode
+    SPI2->CR1 |= (1 << 6); // SPI Enable
+}
+
+/* ------------------ SPI Transfer ------------------ */
+uint8_t spi_transfer(uint8_t data)
+{
+    while (!(SPI1->SR & (1 << 1))); // TXE
+    SPI1->DR = data;
+
+    while (!(SPI2->SR & (1 << 0))); // RXNE
+    return SPI2->DR;
+}
+
+/* ------------------ MAIN ------------------ */
+int main(void)
+{
+    uint8_t tx_data[3] = {0x11, 0x22, 0x33};
+    uint8_t rx_data[3];
+    uint8_t match = 1;
+
+    clock_init();
+    led_init();
+    spi1_gpio_init();
+    spi2_gpio_init();
+
+    spi2_init();   // Slave first
+    spi1_init();   // Master next
+
+    for (int i = 0; i < 3; i++)
+    {
+        rx_data[i] = spi_transfer(tx_data[i]);
+
+        if (rx_data[i] != tx_data[i])
+        {
+            match = 0;
+            break;
+        }
+    }
+
+    if (match)
+        led_on();
+    else
+        led_off();
+
+    while (1);
+}

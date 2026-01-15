@@ -37,15 +37,15 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_macro  0001f8c7  00000000  00000000  000041a2  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   00002a6c  00000000  00000000  00023a69  2**0
+ 17 .debug_line   00002a6a  00000000  00000000  00023a69  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    000c33c5  00000000  00000000  000264d5  2**0
+ 18 .debug_str    000c33c5  00000000  00000000  000264d3  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000043  00000000  00000000  000e989a  2**0
+ 19 .comment      00000043  00000000  00000000  000e9898  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  0000061c  00000000  00000000  000e98e0  2**2
+ 20 .debug_frame  0000061c  00000000  00000000  000e98dc  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_line_str 0000005a  00000000  00000000  000e9efc  2**0
+ 21 .debug_line_str 0000005a  00000000  00000000  000e9ef8  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -259,7 +259,7 @@ int main(void)
  80002d8:	75bb      	strb	r3, [r7, #22]
  80002da:	e014      	b.n	8000306 <main+0x102>
 		{
-			if(spi1_tx_data[i] != spi2_rx_data[i])
+			if(spi1_tx_data[i] == spi2_rx_data[i])
  80002dc:	7dbb      	ldrb	r3, [r7, #22]
  80002de:	3318      	adds	r3, #24
  80002e0:	443b      	add	r3, r7
@@ -269,7 +269,7 @@ int main(void)
  80002ea:	443b      	add	r3, r7
  80002ec:	f813 3c10 	ldrb.w	r3, [r3, #-16]
  80002f0:	429a      	cmp	r2, r3
- 80002f2:	d005      	beq.n	8000300 <main+0xfc>
+ 80002f2:	d105      	bne.n	8000300 <main+0xfc>
 			{
 				GPIOA->ODR |= (1U << 9);
  80002f4:	4b0e      	ldr	r3, [pc, #56]	@ (8000330 <main+0x12c>)
