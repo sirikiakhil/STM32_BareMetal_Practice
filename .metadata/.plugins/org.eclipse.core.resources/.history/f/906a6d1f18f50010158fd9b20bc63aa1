@@ -21,21 +21,22 @@ void spi1_gpio_config(void)
         PA5, PA6, PA7 -> Alternate Function mode
         SPI hardware controls direction internally.
     */
-    GPIOA->MODER &= ~((3U << 10) | (3U << 12) | (3U << 14) );
+    GPIOA->MODER &= ~((3U << 10) | (3U << 12) | (3U << 14));
     GPIOA->MODER |=  ((2U << 10) | (2U << 12) | (2U << 14));
 
     // AF5 for SPI1
-    GPIOA->AFR[0] &=  ~((15 << 20) | (15 << 24) | (15 << 28));
-    GPIOA->AFR[0] |=   ((5 << 20) | (5 << 24) | (5 << 28));
+    GPIOA->AFR[0] &=  ~((15 << 16) | (15 << 20) | (15 << 24));
+    GPIOA->AFR[0] |=   ((5 << 16) | (5 << 20) | (5 << 24));
 
     /*
         PA3 configured as GPIO OUTPUT.
         Used as MANUAL Chip Select (CS).
         SPI1 does NOT use hardware NSS because SSM + SSI are enabled.
     */
+    GPIOA->MODER &= ~(3 << 6);
+    GPIOA->MODER |=  (1 << 6);
 
-    GPIOA->OSPEEDR &= ~((3U << 10) | (3U << 12) | (3U << 14) );  //clear
-    GPIOA->OSPEEDR |= ((2U << 10) | (2U << 12) | (2U << 14));   //set Pins to high speed
+    GPIOA->OSPEEDR |= (0xFF << 8);
 }
 
 /************************************************************/
@@ -101,8 +102,8 @@ void spi2_gpio_config(void)
         PB15 -> MOSI
         Set to AF mode (AF5)
     */
-    GPIOB->MODER &= ~((3U << 26) | (3U << 28) | (3U << 30));
-    GPIOB->MODER |=  ((2U << 26) | (2U << 28) | (2U << 30));
+    GPIOB->MODER &= ~((3U << 8) | (3U << 10) | (3U << 12));
+    GPIOB->MODER |=  ((2U << 8) | (2U << 10) | (2U << 12));
 
     GPIOB->AFR[1] &=  ~((15 << 20) | (15 << 24) | (15 << 28));
     GPIOB->AFR[1] |=   ((5 << 20) | (5 << 24) | (5 << 28));
@@ -113,10 +114,7 @@ void spi2_gpio_config(void)
         Because SPI2 uses Software NSS (SSM + SSI),
         SPI2 hardware ignores the NSS pin completely
     */
-
-
-    GPIOB->OSPEEDR &= ~((3U << 26) | (3U << 28) | (3U << 30) );  //clear
-    GPIOB->OSPEEDR |=  ((2U << 26) | (2U << 28) | (2U << 30));   //set Pins to high speed
+    GPIOB->OSPEEDR |= (0xFF << 24);
 }
 
 /************************************************************/

@@ -1,5 +1,5 @@
 // Header file for SPI configuration and control
-// This file only contains function declarations.
+// This file only contains function declarations
 // Actual logic is implemented in spi.c
 
 #ifndef INC_SPI_H_
@@ -16,8 +16,8 @@ void spi1_gpio_config(void); // Configure GPIO pins used by SPI1
 void spi2_gpio_config(void); // Configure GPIO pins used by SPI2
 
 // Chip Select (CS) control functions
-// NOTE: In this project, CS is used mainly for SPI practice and protocol correctness.
-// SPI2 uses Software NSS (SSM + SSI), so CS is NOT strictly required for SPI2 to work here.
+// NOTE: In this project, CS is used mainly for SPI practice and protocol correctness
+// SPI2 uses Software NSS (SSM + SSI), so CS is NOT strictly required for SPI2 to work here
 void cs_enable(void);        // Pull CS LOW (select slave)
 void cs_disable(void);       // Pull CS HIGH (deselect slave)
 

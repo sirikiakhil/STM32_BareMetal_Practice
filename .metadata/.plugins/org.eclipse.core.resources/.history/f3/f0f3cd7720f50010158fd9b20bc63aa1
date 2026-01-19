@@ -34,8 +34,8 @@ void spi1_gpio_config(void)
         SPI1 does NOT use hardware NSS because SSM + SSI are enabled.
     */
 
-    GPIOA->OSPEEDR &= ~((3U << 10) | (3U << 12) | (3U << 14) );  //clear
-    GPIOA->OSPEEDR |= ((2U << 10) | (2U << 12) | (2U << 14));   //set Pins to high speed
+    GPIOA->OSPEEDR &= ~(0xFF << 8);  //clear
+    GPIOA->OSPEEDR |= (0xFF << 8);   //set Pins to high speed
 }
 
 /************************************************************/
@@ -115,8 +115,8 @@ void spi2_gpio_config(void)
     */
 
 
-    GPIOB->OSPEEDR &= ~((3U << 26) | (3U << 28) | (3U << 30) );  //clear
-    GPIOB->OSPEEDR |=  ((2U << 26) | (2U << 28) | (2U << 30));   //set Pins to high speed
+    GPIOB->OSPEEDR &= ~(0xFF << 24);   //clear
+    GPIOB->OSPEEDR |= (0xFF << 24);   //set Pins to high speed
 }
 
 /************************************************************/

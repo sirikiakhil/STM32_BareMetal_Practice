@@ -107,8 +107,6 @@ int main(void)
 
 static void led_on(void)
 {
-	 RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
-
 	 GPIOA->MODER &= ~(3 << 18);
 	 GPIOA->MODER |=  (1 << 18);
 

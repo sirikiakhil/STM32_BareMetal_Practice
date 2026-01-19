@@ -1,10 +1,10 @@
-17:48:06 **** Incremental Build of configuration Debug for project led_3 ****
+15:17:33 **** Incremental Build of configuration Debug for project led_3 ****
 make -j4 all 
 arm-none-eabi-size  led_3.elf 
    text	   data	    bss	    dec	    hex	filename
-   1164	      4	   1572	   2740	    ab4	led_3.elf
+   1168	      4	   1572	   2744	    ab8	led_3.elf
 Finished building: default.size.stdout
  
 
-17:48:06 Build Finished. 0 errors, 0 warnings. (took 381ms)
+15:17:33 Build Finished. 0 errors, 0 warnings. (took 377ms)
 
