@@ -1,6 +1,6 @@
-../Core/Src/spi.c:14:6:spi1_gpio_config	1
-../Core/Src/spi.c:43:6:spi1_config	1
-../Core/Src/spi.c:91:6:spi2_gpio_config	1
-../Core/Src/spi.c:124:6:spi2_config	1
-../Core/Src/spi.c:166:6:cs_enable	1
-../Core/Src/spi.c:176:6:cs_disable	1
+../Core/Src/spi.c:13:6:spi1_gpio_config	1
+../Core/Src/spi.c:42:6:spi1_config	1
+../Core/Src/spi.c:90:6:spi2_gpio_config	1
+../Core/Src/spi.c:130:6:spi2_config	1
+../Core/Src/spi.c:174:6:cs_enable	1
+../Core/Src/spi.c:184:6:cs_disable	1

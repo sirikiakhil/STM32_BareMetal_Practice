@@ -1,4 +1,3 @@
-
 #include "SPI.h"
 
 /*
@@ -101,11 +100,11 @@ void spi2_gpio_config(void)
         PB15 -> MOSI
         Set to AF mode (AF5)
     */
-    GPIOB->MODER &= ~((3U << 26) | (3U << 28) | (3U << 30));
-    GPIOB->MODER |=  ((2U << 26) | (2U << 28) | (2U << 30));
+    GPIOB->MODER &= ~((3U << 24) | (3U << 26) | (3U << 28) | (3U << 30));
+    GPIOB->MODER |=  ((2U << 24) | (2U << 26) | (2U << 28) | (2U << 30));
 
-    GPIOB->AFR[1] &=  ~((15 << 20) | (15 << 24) | (15 << 28));
-    GPIOB->AFR[1] |=   ((5 << 20) | (5 << 24) | (5 << 28));
+    GPIOB->AFR[1] &=  ~((15U << 16) | (15U << 20) | (15U << 24) | (15U << 28));
+    GPIOB->AFR[1] |=   ((5U << 16) | (5U << 20) | (5U << 24) | (5U << 28));
 
     /*
         NOTE:
@@ -115,8 +114,15 @@ void spi2_gpio_config(void)
     */
 
 
-    GPIOB->OSPEEDR &= ~((3U << 26) | (3U << 28) | (3U << 30) );  //clear
-    GPIOB->OSPEEDR |=  ((2U << 26) | (2U << 28) | (2U << 30));   //set Pins to high speed
+    GPIOB->OSPEEDR &= ~((3U << 24) | (3U << 26) | (3U << 28) | (3U << 30) );  //clear
+    GPIOB->OSPEEDR |=  ((2U << 24) | (2U << 26) | (2U << 28) | (2U << 30));   //set Pins to high speed
+
+    // PB12 as GPIO output (force NSS low)
+    GPIOB->MODER &= ~(3U << 24);
+    GPIOB->MODER |=  (1U << 24);
+
+    GPIOB->ODR   &= ~(1U << 12);   // NSS = LOW (slave selected)
+
 }
 
 /************************************************************/
@@ -154,8 +160,10 @@ void spi2_config(void)
         - NSS pin is ignored
         - Works for learning / internal testing
     */
+
     SPI2->CR1 |= (SPI_CR1_SSM);
-    SPI2->CR1 |= (SPI_CR1_SSI);
+    SPI2->CR1 &= ~(SPI_CR1_SSI);   // <<< CRITICAL
+
 
     // Enable SPI2
     SPI2->CR1 |= (SPI_CR1_SPE);

@@ -1,6 +1,7 @@
 /*
  * Sending Character Using UART TX
  */
+
 #include"stm32f4xx.h"
 
 #define BAUDRATE     115200U

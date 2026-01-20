@@ -1,0 +1,85 @@
+#include "SPI.h"
+
+/*
+    PA5 -> SPI1_SCK
+    PA6 -> SPI1_MISO
+    PA7 -> SPI1_MOSI
+    PA3 -> MANUAL CS (Master side)
+*/
+
+void spi1_gpio_config(void)
+{
+    RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOAEN);
+
+    // PA5, PA6, PA7 -> Alternate Function mode
+    GPIOA->MODER &= ~((3U << 10) | (3U << 12) | (3U << 14));
+    GPIOA->MODER |=  ((2U << 10) | (2U << 12) | (2U << 14));
+
+    // AF5 for SPI1 (Pins 5, 6, 7 are in AFR[0])
+    GPIOA->AFR[0] &=  ~((15U << 20) | (15U << 24) | (15U << 28));
+    GPIOA->AFR[0] |=   ((5U << 20) | (5U << 24) | (5U << 28));
+
+    // PA3 as Output for Manual CS
+    GPIOA->MODER &= ~(3U << 6);
+    GPIOA->MODER |=  (1U << 6);
+
+    GPIOA->OSPEEDR |= ((2U << 10) | (2U << 12) | (2U << 14)); // High speed
+}
+
+void spi1_config(void)
+{
+    RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
+
+    SPI1->CR1 &= ~(SPI_CR1_SPE); // Disable before config
+
+    // Baud rate: 16MHz / 4 = 4MHz (BR[2:0] = 001)
+    SPI1->CR1 |= (1U << 3);
+
+    // CPOL = 1, CPHA = 1
+    SPI1->CR1 |= (SPI_CR1_CPOL | SPI_CR1_CPHA);
+    SPI1->CR1 |= (SPI_CR1_MSTR);      // Master Mode
+    SPI1->CR1 |= (SPI_CR1_SSM | SPI_CR1_SSI); // Software NSS
+
+    SPI1->CR1 |= (SPI_CR1_SPE); // Enable
+}
+
+/*
+    PB13 -> SPI2_SCK
+    PB14 -> SPI2_MISO
+    PB15 -> SPI2_MOSI
+*/
+void spi2_gpio_config(void)
+{
+    RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOBEN);
+
+    // CORRECTED: PB13, PB14, PB15 are bits 26-31
+    GPIOB->MODER &= ~((3U << 26) | (3U << 28) | (3U << 30));
+    GPIOB->MODER |=  ((2U << 26) | (2U << 28) | (2U << 30));
+
+    // CORRECTED: PB13, 14, 15 are in AFR[1] (High Register)
+    // PB13 = bits 20-23, PB14 = 24-27, PB15 = 28-31
+    GPIOB->AFR[1] &=  ~((15U << 20) | (15U << 24) | (15U << 28));
+    GPIOB->AFR[1] |=   ((5U << 20) | (5U << 24) | (5U << 28));
+
+    GPIOB->OSPEEDR |= ((2U << 26) | (2U << 28) | (2U << 30));
+}
+
+void spi2_config(void)
+{
+    RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
+
+    SPI2->CR1 &= ~(SPI_CR1_SPE);
+
+    // Slave must match Master mode
+    SPI2->CR1 |= (SPI_CR1_CPOL | SPI_CR1_CPHA);
+    SPI2->CR1 &= ~(SPI_CR1_MSTR);    // Slave Mode
+
+    // CORRECTED: SSI = 0 for Slave to stay "Selected"
+    SPI2->CR1 |= (SPI_CR1_SSM);
+    SPI2->CR1 &= ~(SPI_CR1_SSI);
+
+    SPI2->CR1 |= (SPI_CR1_SPE);
+}
+
+void cs_enable(void)  { GPIOA->ODR &= ~(1U << 3); }
+void cs_disable(void) { GPIOA->ODR |= (1U << 3); }
