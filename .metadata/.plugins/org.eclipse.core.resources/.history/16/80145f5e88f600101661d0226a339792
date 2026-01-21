@@ -6,7 +6,6 @@
 
 static void led_on(void);
 static void led_off(void);
-static void led_config(void);
 
 int main(void)
 {
@@ -92,11 +91,10 @@ int main(void)
 	temp = SPI2->DR;
 	temp = SPI2->SR;
 
-	uint8_t mark;
+	uint8_t mark =1;
 
 	while(1)
 	{
-		mark =1;
 		for(uint8_t i = 0; i<3; i++)
 		{
 			if((spi2_rx_data[i]) != (spi1_tx_data[i]))
@@ -121,20 +119,22 @@ int main(void)
 
 static void led_on(void)
 {
+	 RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+
+	 GPIOA->MODER &= ~(3 << 18);
+	 GPIOA->MODER |=  (1 << 18);
+
 	 GPIOA->ODR  |= (1 << 9);
 }
 
 static void led_off(void)
 {
-	 GPIOA->ODR  &= ~(1 << 9);
+	 RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+
+		 GPIOA->MODER &= ~(3 << 18);
+		 GPIOA->MODER |=  (1 << 18);
+
+		 GPIOA->ODR  &= ~(1 << 9);
 }
 
 /**************************************************************/
-
-static void led_config(void)
-{
-	RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
-
-	GPIOA->MODER &= ~(3 << 18);
-	GPIOA->MODER |=  (1 << 18);
-}

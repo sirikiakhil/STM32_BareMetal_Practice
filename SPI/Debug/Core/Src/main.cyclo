@@ -1,3 +1,4 @@
-../Core/Src/main.c:10:5:main	10
-../Core/Src/main.c:110:13:led_on	1
-../Core/Src/main.c:120:13:led_off	1
+../Core/Src/main.c:11:5:main	10
+../Core/Src/main.c:122:13:led_on	1
+../Core/Src/main.c:127:13:led_off	1
+../Core/Src/main.c:134:13:led_config	1

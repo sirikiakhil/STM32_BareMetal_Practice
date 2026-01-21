@@ -15,7 +15,6 @@ void spi2_config(void);      // Configure SPI2 as SLAVE
 void spi1_gpio_config(void); // Configure GPIO pins used by SPI1
 void spi2_gpio_config(void); // Configure GPIO pins used by SPI2
 
-
 // Chip Select (CS) control functions
 // NOTE: In this project, CS is used mainly for SPI practice and protocol correctness
 // SPI2 uses Software NSS (SSM + SSI), so CS is NOT strictly required for SPI2 to work here
