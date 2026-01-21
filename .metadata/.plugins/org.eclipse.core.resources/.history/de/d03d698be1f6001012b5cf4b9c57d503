@@ -89,6 +89,7 @@ int main(void)
 	temp = SPI2->DR;
 	temp = SPI2->SR;
 
+	uint8_t mark;
 
 	while(1)
 	{
