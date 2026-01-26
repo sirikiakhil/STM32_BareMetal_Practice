@@ -1,0 +1,262 @@
+
+
+#include "I2C.h"
+
+#define I2C_stand_mode               80      // Value to set CCR for 100kHz
+#define RISE_TIME                    17      // Max rise time for Standard mode
+#define I2C_PE_CR1                  (1U<<0) // I2C enable bit
+#define SR2_BUSY                    (1U<<1)
+#define CR1_START                   (1U<<8) // Start condition bit
+#define SR1_SB                      (1U<<0) // Start bit flag
+#define SR1_ADDR                    (1U<<1)
+#define SR1_TXE                     (1U<<7)
+#define CR1_ACK                     (1U<<10)
+#define CR1_STOP                    (1U<<9)
+#define SR1_RXNE                    (1U<<6)
+#define SR1_BTF                     (1U<<2)
+
+void I2C1_Init(void)
+{
+    /* Turn ON clock for GPIOB because I2C pins are on this port */
+    RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOBEN);
+    (void)RCC->AHB1ENR;
+
+    /* Configure PB8 & PB9 as Alternate Function pins
+       From datasheet:
+       PB8/PB6 → SCL
+       PB9/PB7 → SDA
+       Using PB8 & PB9 (AF4) */
+    GPIOB->MODER |= (1U<<17);
+    GPIOB->MODER &= ~(1U<<16);
+    GPIOB->MODER |= (1U<<19);
+    GPIOB->MODER &= ~(1U<<18);
+
+    /* Select AF4 for I2C on PB8 & PB9 */
+    GPIOB->AFR[1] &= ~(1U<<0);
+    GPIOB->AFR[1] &= ~(1U<<1);
+    GPIOB->AFR[1] |=  (1U<<2);
+    GPIOB->AFR[1] &= ~(1U<<3);
+
+    GPIOB->AFR[1] &= ~(1U<<4);
+    GPIOB->AFR[1] &= ~(1U<<5);
+    GPIOB->AFR[1] &= ~(1U<<6);
+    GPIOB->AFR[1] &= ~(1U<<7);
+
+    /* Set pins as Open Drain (required for I2C) */
+    GPIOB->OTYPER |= (1U <<8);
+    GPIOB->OTYPER |= (1U <<9);
+
+    /* Enable pull-up resistors */
+
+    GPIOB->PUPDR &= ~(1U<<17);
+    GPIOB->PUPDR &= ~(1U<<19);
+    GPIOB->PUPDR |=  (1U<<16);
+    GPIOB->PUPDR |=  (1U<<18);
+
+    /* Enable I2C clock */
+    RCC->APB1ENR |= (RCC_APB1ENR_I2C1EN);
+
+    /* Enter software reset mode before configuring */
+    I2C1->CR1 |= (I2C_CR1_SWRST);
+
+    /* Exit reset mode */
+    I2C1->CR1 &= ~(I2C_CR1_SWRST);
+
+    /* Tell I2C the APB1 clock frequency (16 MHz) */
+    I2C1->CR2 = (1U << 4);
+
+    /* Configure for standard 100kHz */
+    I2C1->CCR = I2C_stand_mode;
+
+    /* Set rise time */
+    I2C1->TRISE = RISE_TIME;
+
+    /* Enable I2C peripheral */
+    I2C1->CR1 |= (I2C_CR1_PE);
+}
+
+
+/* Function to read a single byte from slave */
+void I2C_ByteRead(char saddr, char reg_addr, char* data )
+{
+	volatile int temp;
+
+	/* First wait until I2C bus becomes free */
+	while(I2C1->SR2 & (I2C_SR2_BUSY)){}
+
+	/* Send START condition to begin communication */
+	I2C1->CR1 |= (I2C_CR1_START);
+
+	/* Wait until START bit is confirmed */
+	while(!(I2C1->SR1 & (I2C_SR1_SB))){}
+
+	/* Send slave address with WRITE mode */
+	I2C1->DR = saddr << 1;
+
+	/* Wait until address phase is completed */
+	while(!(I2C1->SR1 & (I2C_SR1_ADDR))){}
+
+	/* Clear ADDR flag by reading SR2 */
+	temp = I2C1->SR2;
+
+	/* Send memory/register address inside slave */
+	I2C1->DR = reg_addr;
+
+	/* Wait until data register becomes empty */
+	while(!(I2C1->SR1 & I2C_SR1_TxE)){}
+
+	/* Generate Re-START to switch to read mode */
+	I2C1->CR1 |= (I2C_CR1_START);
+
+	/* Wait again for START flag */
+	while(!(I2C1->SR1 & (I2C_SR1_SB))){}
+
+	/* Send slave address with READ bit */
+	I2C1->DR = saddr << 1 | 1;
+
+	/* Wait until address phase completes */
+	while(!(I2C1->SR1 & (I2C_SR1_ADDR))){}
+
+	/* Disable ACK since we read only one byte */
+	I2C1->CR1 &= ~(I2C_CR1_AF);
+
+	/* Clear ADDR flag */
+	temp = I2C1->SR2;
+
+	/* Generate STOP condition */
+	I2C1->CR1 |= (I2C_CR1_STOP);
+
+	/* Wait until data is received */
+	while(!(I2C1->SR1 & (I2C_SR1_RXNE))){}
+
+	/* Store received byte */
+	*data++ = I2C1->DR;
+}
+
+/* Function to read multiple bytes from slave */
+void I2C1_BurstRead(char saddr, char reg_addr, int n, char* data)
+{
+	volatile int temp;
+
+	/* Make sure bus is free */
+	while(I2C1->SR2 & (I2C_SR2_BUSY)){}
+
+	/* Send START */
+	I2C1->CR1 |= (I2C_CR1_START);
+
+	/* Wait for START confirmation */
+	while(!(I2C1->SR1 & (I2C_SR1_SB))){}
+
+	/* Send slave address (write mode) */
+	I2C1->DR = saddr << 1;
+
+	/* Wait for address phase completion */
+	while(!(I2C1->SR1 & (I2C_SR1_ADDR))){}
+
+	/* Clear ADDR flag */
+	temp = I2C1->SR2;
+
+	/* Wait until DR is empty */
+	while(!(I2C1->SR1 & (I2C_SR1_TxE))){}
+
+	/* Send internal memory address */
+	I2C1->DR = reg_addr;
+
+	/* Wait again until DR empty */
+	while(!(I2C1->SR1 & (I2C_SR1_TxE))){}
+
+	/* Send Re-START */
+	I2C1->CR1 |= (I2C_CR1_START);
+
+	/* Wait for START */
+	while(!(I2C1->SR1 & (I2C_SR1_SB))){}
+
+	/* Send slave address (read mode) */
+	I2C1->DR = saddr << 1 | 1;
+
+	/* Wait for address phase */
+	while(!(I2C1->SR1 & (I2C_SR1_ADDR))){}
+
+	/* Clear ADDR flag */
+	temp = I2C1->SR2;
+
+	/* Enable ACK for multiple bytes */
+	I2C1->CR1 |= (I2C_CR1_AF);
+
+	while(n>0U)
+	{
+		/* If last byte remaining */
+		if(n == 1)
+		{
+			/* Disable ACK before final read */
+			I2C1->CR1 &= ~(I2C_CR1_AF);
+
+			/* Generate STOP */
+			I2C1->CR1 |= (I2C_CR1_STOP);
+
+			/* Wait until data arrives */
+			while(!(I2C1->SR1 & (I2C_SR1_RXNE))){}
+
+			/* Store last byte */
+			*data++ = I2C1->DR;
+
+			break;
+		}
+		else
+		{
+			/* Wait for data ready */
+			while(!(I2C1->SR1 & (I2C_SR1_RXNE))){}
+
+			/* Read byte */
+			(*data++) = I2C1->DR;
+
+			n--;
+		}
+	}
+}
+
+
+/* Function to write multiple bytes to slave */
+void I2C1_BurstWrite(char saddr, char reg_addr, int n, char* data)
+{
+	volatile int temp;
+
+	/* Wait until bus becomes idle */
+	while(I2C1->SR2 & I2C_SR2_BUSY) {}
+
+	/* Generate START */
+	I2C1->CR1 |= (I2C_CR1_START);
+
+	/* Wait for START confirmation */
+	while(!(I2C1->SR1 & (I2C_SR1_SB))){}
+
+	/* Send slave address with write bit */
+	I2C1->DR = saddr << 1;
+
+	/* Wait for address acknowledgement */
+	while(!(I2C1->SR1 & (I2C_SR1_ADDR))){}
+
+	/* Clear ADDR flag */
+	temp = I2C1->SR2;
+
+	/* Wait until DR empty */
+	while(!(I2C1->SR1 & (I2C_SR1_TxE))){}
+
+	/* Send memory/register address */
+	I2C1->DR = reg_addr;
+
+	for(int i=0; i<n; i++)
+	{
+		/* Wait until DR is ready */
+		while(!(I2C1->SR1 & (I2C_SR1_TxE))){}
+
+		/* Send each data byte */
+		I2C1->DR = *data++;
+	}
+
+	/* Wait until transfer fully finishes */
+	while(!(I2C1->SR1 & (I2C_SR1_BTF))){}
+
+	/* Send STOP to end communication */
+	I2C1->CR1 |= (I2C_CR1_STOP);
+}

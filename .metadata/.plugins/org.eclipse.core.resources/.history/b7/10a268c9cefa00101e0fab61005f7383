@@ -1,0 +1,91 @@
+/* I2C
+
+I2C – Inter Integrated Circuit communication
+   - Also called Two-Wire Interface
+
+   I2C uses two signals: SCL and SDA
+
+   SCL : Serial Clock
+        Used to keep master and slave in sync during data transfer.
+
+   SDA : Serial Data
+        Line through which actual data is sent/received.
+
+   Operating Modes
+        - Master Transmitter
+        - Master Receiver
+        - Slave Transmitter
+        - Slave Receiver
+   ***************************************************************************************************
+   - Every communication is started and controlled by the Master.
+   - Each transfer contains an address part and a data part.
+   - Data is put on SDA when SCL is LOW, and it is read when SCL becomes HIGH.
+   ***************************************************************************************************
+
+   ***************************************************************************************************
+   START and STOP Conditions
+   - All communications begin with START and end with STOP.
+   - If SDA goes HIGH → LOW while SCL is HIGH, it means START.
+   - If SDA goes LOW → HIGH while SCL is HIGH, it means STOP.
+   - Only the Master can create START and STOP.
+   - After STOP, the bus becomes free after some delay.
+   - If a repeated START happens instead of STOP, the bus remains busy.
+   - Every data unit sent on SDA is 8 bits.
+
+   BYTE Format
+   - There is no fixed limit on how many bytes can be sent in one transfer.
+   - After each byte, an ACK bit must follow.
+   - Data always goes MSB first.
+
+   ADDRESS Frame
+   - Communication always starts with the address frame.
+   - For 7-bit addressing, the address is sent MSB first, then the R/W bit.
+   - R/W = 1 → Read, R/W = 0 → Write.
+
+   DATA Frame
+   - After address frame, the data frame starts.
+   - The master keeps generating clock pulses.
+   - Data on SDA will be controlled either by master or slave based on R/W bit.
+
+   Clock Speed
+   - This defines how fast I2C runs and must match I2C standards.
+
+        Standard Mode      : 100 KHz max
+        Fast Mode          : 400 KHz max
+        Fast Mode Plus     : 1 MHz
+        High Speed Mode    : 3.4 MHz
+
+   DUTY CYCLE
+        - Ratio between SCL low time and high time.
+        - Available options:
+              I2C_DUTYCYCLE_2      → 2:1
+              I2C_DUTYCYCLE_16_9   → 16:9
+        - Selecting duty cycle helps in adjusting clock timing for required speed.
+*/
+
+#include "I2C.h"
+
+int main(void)
+{
+    char rx_data[4]; // Array used to hold data read back from the slave device
+
+    I2C1_Init(); // Setting up the I2C1 peripheral (GPIO, clock, timing, etc.)
+
+    // Small delay just to give the slave device time to power up and get ready
+    for (volatile int i = 0; i < 100000; i++);
+
+    // Test write: sending the characters "HEY" to slave with address 0x42
+    char tx_data[] = { 'E', 'S', 'C' };
+    I2C1_BurstWrite(0x42, 0x00, 3, tx_data);
+
+    // Test read: trying to receive 4 bytes from the same slave
+    I2C1_BurstRead(0x42, 0x00, 4, rx_data);
+
+    // At this point, the received data is inside rx_data[]
+    // You can check it in debugger or print it through UART
+
+    while (1)
+    {
+        // Staying here forever (main loop does nothing else)
+    }
+}

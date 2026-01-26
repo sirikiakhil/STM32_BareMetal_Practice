@@ -45,7 +45,8 @@ static void uart_config(void)
 
 	USART2->CR1 &= ~USART_CR1_UE;  //disabled uart to configure
 
-	USART2->BRR = Baudrate_config(CLOCK_FREQ,BAUDRATE);
+	USART2->BRR = Baudrate_config(CLOCK_FREQ,BAUDRATE); //UART does not store baud rate directly , insted it stores a divider value
+    //Divider = (clock / Baudrate)
 
 	USART2->CR1 |= USART_CR1_TE;  // TE
 
@@ -54,7 +55,7 @@ static void uart_config(void)
 
 static uint32_t Baudrate_config(uint32_t Clk_freq,uint32_t Baudrate)
 {
-	return ((Clk_freq + (Baudrate/2))/Baudrate);
+	return ((Clk_freq + (Baudrate/2))/Baudrate); //this formula is used to rounding the integer division value
 }
 
 static void Uart_tx(char ch)
