@@ -1,6 +1,6 @@
 //SPI (loopback method)
 
-#include "SPI.h"
+#include "spi.h"
 
 /************************************************************/
 
@@ -129,3 +129,105 @@ int main(void)
 
 	 	4. Read data from Data Register
     */
+
+/*
+====================== SPI TRANSMIT FLOW (WHY EACH STEP EXISTS) ======================
+
+1. Configure SPI peripheral (ONCE)
+   - Set MASTER or SLAVE mode.
+   - Configure CPOL and CPHA (clock idle level and sampling edge).
+   - Set data frame size (8-bit / 16-bit).
+   - Configure baud rate (master only).
+   - Configure NSS handling (SSM/SSI or hardware NSS).
+
+2. Enable SPI peripheral
+   - SPI hardware is inactive until SPE bit is set.
+   - No clock or data transfer happens before this.
+
+3. Assert CS (Chip Select) LOW (if using GPIO CS)
+   - Selects the target slave device.
+   - Tells slave that communication is about to start.
+   - Required for real external SPI devices.
+
+4. Wait until TXE flag is set
+   - TXE = Transmit buffer empty.
+   - Ensures SPI is ready to accept new data.
+   - Prevents overwriting the data register.
+
+5. Write data to SPI Data Register (DR)
+   - Writing DR starts the SPI clock automatically (master mode).
+   - Data is loaded into transmit shift register.
+   - At the same time, reception also begins (full-duplex).
+
+6. Wait until transmission completes
+   - Either wait for RXNE (receive buffer not empty)
+   - Or wait until BSY flag becomes 0 (SPI not busy).
+   - Ensures last clock pulse is finished.
+
+7. Read DR (mandatory, even if data is dummy)
+   - Clears RXNE flag.
+   - Prevents overrun (OVR) error.
+   - SPI always receives data during transmission.
+
+8. Deassert CS HIGH (if using GPIO CS)
+   - Marks end of SPI transaction.
+   - Allows slave to process received data.
+
+===============================================================================
+KEY IDEA:
+SPI is full-duplex: every transmit generates a receive.
+Clock is generated automatically by master when DR is written.
+Skipping RX read or BSY check can cause deadlock or OVR error.
+===============================================================================
+*/
+
+/*
+====================== SPI RECEIVE FLOW (WHY EACH STEP EXISTS) ======================
+
+1. Configure SPI peripheral (ONCE)
+   - Set MASTER or SLAVE mode.
+   - Configure CPOL and CPHA (clock idle level and sampling edge).
+   - Set data frame size (8-bit / 16-bit).
+   - Configure NSS handling (SSM/SSI or hardware NSS).
+
+2. Enable SPI peripheral
+   - SPI hardware is inactive until SPE bit is set.
+   - No reception can occur before this.
+
+3. Assert CS (Chip Select) LOW (if using GPIO CS)
+   - Selects the slave device.
+   - Required for the slave to start driving MISO.
+
+4. Wait until TXE flag is set
+   - Even for RECEIVE, master must transmit something.
+   - TXE ensures DR is ready for dummy data.
+
+5. Write DUMMY data to SPI Data Register (DR)
+   - SPI is full-duplex: reception happens ONLY during transmission.
+   - Writing dummy data generates clock pulses.
+   - Slave shifts real data onto MISO.
+
+6. Wait until RXNE flag is set
+   - RXNE = Receive buffer not empty.
+   - Indicates a full data frame has been received.
+
+7. Read data from SPI Data Register (DR)
+   - Retrieves the received data.
+   - Clears RXNE flag.
+   - Mandatory to avoid overrun (OVR) error.
+
+8. Wait until BSY flag becomes 0
+   - Ensures last clock pulse is completed.
+   - Prevents premature CS deassertion.
+
+9. Deassert CS HIGH (if using GPIO CS)
+   - Ends the SPI transaction.
+   - Slave stops driving MISO.
+
+===============================================================================
+KEY IDEA:
+SPI has no true "receive-only" mode.
+Master must transmit dummy data to generate clock,
+and every receive operation always includes a transmit.
+===============================================================================
+*/

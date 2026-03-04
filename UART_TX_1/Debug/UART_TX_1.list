@@ -181,13 +181,14 @@ static void uart_config(void)
  800028e:	f423 5300 	bic.w	r3, r3, #8192	@ 0x2000
  8000292:	60d3      	str	r3, [r2, #12]
 
-	USART2->BRR = Baudrate_config(CLOCK_FREQ,BAUDRATE);
+	USART2->BRR = Baudrate_config(CLOCK_FREQ,BAUDRATE); //UART does not store baud rate directly , insted it stores a divider value
  8000294:	4c0c      	ldr	r4, [pc, #48]	@ (80002c8 <uart_config+0x94>)
  8000296:	f44f 31e1 	mov.w	r1, #115200	@ 0x1c200
  800029a:	480c      	ldr	r0, [pc, #48]	@ (80002cc <uart_config+0x98>)
  800029c:	f000 f818 	bl	80002d0 <Baudrate_config>
  80002a0:	4603      	mov	r3, r0
  80002a2:	60a3      	str	r3, [r4, #8]
+    //Divider = (clock / Baudrate)
 
 	USART2->CR1 |= USART_CR1_TE;  // TE
  80002a4:	4b08      	ldr	r3, [pc, #32]	@ (80002c8 <uart_config+0x94>)
@@ -219,7 +220,7 @@ static uint32_t Baudrate_config(uint32_t Clk_freq,uint32_t Baudrate)
  80002d4:	af00      	add	r7, sp, #0
  80002d6:	6078      	str	r0, [r7, #4]
  80002d8:	6039      	str	r1, [r7, #0]
-	return ((Clk_freq + (Baudrate/2))/Baudrate);
+	return ((Clk_freq + (Baudrate/2))/Baudrate); //this formula is used to rounding the integer division value
  80002da:	683b      	ldr	r3, [r7, #0]
  80002dc:	085a      	lsrs	r2, r3, #1
  80002de:	687b      	ldr	r3, [r7, #4]

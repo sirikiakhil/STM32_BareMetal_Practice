@@ -1,4 +1,4 @@
-#include "SPI.h"
+#include "spi.h"
 
 /*
     PA5 -> SPI1_SCK

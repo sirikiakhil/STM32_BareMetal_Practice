@@ -1,0 +1,64 @@
+
+
+#include"stm32f4xx.h"
+
+void gpio_config();
+void ADC_config();
+
+int main(void)
+{
+	gpio_config();
+	ADC_config();
+	uint16_t value;
+	while(1);
+	{
+
+		while(!(ADC1->SR & 2U));
+		{
+			value = ADC1->DR;
+		}
+
+	}
+}
+
+void gpio_config()
+{
+	RCC->AHB1ENR |= (RCC_AHB1ENR_GPIOAEN);
+	(void)RCC->AHB1ENR;
+
+	GPIOA->MODER &= ~(3U << 14);
+	GPIOA->MODER |= (3U << 14);
+
+	GPIOA->PUPDR &= ~(3U << 14);
+}
+
+void ADC_config()
+{
+	RCC->APB2ENR |= (RCC_APB2ENR_ADC1EN);
+	(void)RCC->APB2ENR;
+
+	ADC1->CR2 &= ~(1U);
+
+	//Configure ADC Common Settings
+	ADC->CCR &= ~(15U);
+    ADC->CCR &= ~(3U << 16);
+
+	//ADC Basic Configuration (ADC1)
+	ADC1->CR1 &= ~(1U << 8);
+
+	ADC1->CR1 &= ~(3U << 24);
+
+	ADC1->CR2 |= (1U << 1);
+
+	ADC1->CR2 &= ~(1U << 11);
+
+	ADC1->SMPR2 |= (7U);
+
+	ADC1->SQR1 &= ~(15U << 20);
+
+	ADC1->SQR3 &= ~(47U);
+
+	ADC1->CR2 |= (1 << 0);
+
+	ADC1->CR2 |= (1U <<30);
+}

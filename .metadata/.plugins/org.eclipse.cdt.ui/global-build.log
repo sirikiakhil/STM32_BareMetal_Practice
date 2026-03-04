@@ -1,26 +1,21 @@
-21:24:26 **** Incremental Build of configuration Debug for project I2C_1 ****
+21:41:55 **** Incremental Build of configuration Debug for project ADC_1 ****
 make -j4 all 
-arm-none-eabi-gcc "../Core/Src/I2C.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/I2C.d" -MT"Core/Src/I2C.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/I2C.o"
-../Core/Src/I2C.c: In function 'I2C_ByteRead':
-../Core/Src/I2C.c:66:22: warning: variable 'temp' set but not used [-Wunused-but-set-variable]
-   66 |         volatile int temp;  // Used to clear flags
-      |                      ^~~~
-../Core/Src/I2C.c: In function 'I2C1_BurstRead':
-../Core/Src/I2C.c:124:22: warning: variable 'temp' set but not used [-Wunused-but-set-variable]
-  124 |         volatile int temp;
-      |                      ^~~~
-../Core/Src/I2C.c: In function 'I2C1_BurstWrite':
-../Core/Src/I2C.c:207:22: warning: variable 'temp' set but not used [-Wunused-but-set-variable]
-  207 |         volatile int temp;
-      |                      ^~~~
-arm-none-eabi-gcc -o "I2C_1.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\akhil\STM32_BareMetal_Practice\I2C_1\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="I2C_1.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: I2C_1.elf
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+arm-none-eabi-gcc -o "ADC_1.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\akhil\STM32_BareMetal_Practice\ADC_1\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="ADC_1.map" -Wl,--gc-sections -static -u _printf_float --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Finished building target: ADC_1.elf
  
-arm-none-eabi-size  I2C_1.elf 
-arm-none-eabi-objdump -h -S I2C_1.elf  > "I2C_1.list"
+arm-none-eabi-size  ADC_1.elf 
+arm-none-eabi-objdump -h -S ADC_1.elf  > "ADC_1.list"
    text	   data	    bss	    dec	    hex	filename
-   1800	      4	   1572	   3376	    d30	I2C_1.elf
+  16696	    460	   1908	  19064	   4a78	ADC_1.elf
 Finished building: default.size.stdout
  
-Finished building: I2C_1.list
+Finished building: ADC_1.list
+ 
+21:42:02 **** Incremental Build of configuration Debug for project ADC_1 ****
+make -j4 all 
+arm-none-eabi-size  ADC_1.elf 
+   text	   data	    bss	    dec	    hex	filename
+  16696	    460	   1908	  19064	   4a78	ADC_1.elf
+Finished building: default.size.stdout
  

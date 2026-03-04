@@ -64,3 +64,80 @@ static void Uart_tx(char ch)
 
 		USART2->DR = ch;
 }
+
+
+/*
+====================== UART TRANSMIT FLOW (WHY EACH STEP EXISTS) ======================
+
+1. Configure UART peripheral (ONCE)
+   - Select baud rate (based on peripheral clock).
+   - Configure word length (8/9 bits).
+   - Configure parity (none/even/odd).
+   - Configure stop bits (usually 1).
+   - Enable transmitter (TE bit).
+
+2. Enable UART peripheral
+   - UART hardware is inactive until UE bit is set.
+   - TX line stays idle (HIGH) until transmission starts.
+
+3. Wait until TXE flag is set
+   - TXE = Transmit data register empty.
+   - Indicates DR is ready to accept new data.
+   - Prevents overwriting the transmit buffer.
+
+4. Write data to UART Data Register (DR)
+   - Writing DR starts transmission automatically.
+   - Hardware adds START bit, parity (if enabled), and STOP bit.
+   - Data is shifted out on TX line.
+
+5. Wait until TC flag is set
+   - TC = Transmission complete.
+   - Ensures last STOP bit is fully transmitted.
+   - Required before disabling UART or changing direction.
+
+6. Repeat steps 3–5 for more data
+   - Each byte is framed and transmitted independently.
+
+===============================================================================
+KEY IDEA:
+UART is asynchronous: no clock line exists.
+Each byte is framed with START and STOP bits,
+and TXE and TC flags synchronize software with hardware timing.
+===============================================================================
+*/
+
+
+/*
+====================== UART RECEIVE FLOW (WHY EACH STEP EXISTS) ======================
+
+1. Configure UART peripheral (ONCE)
+   - Select baud rate (must match transmitter).
+   - Configure word length, parity, and stop bits.
+   - Enable receiver (RE bit).
+
+2. Enable UART peripheral
+   - UART hardware starts monitoring the RX line.
+   - RX line remains idle HIGH until a START bit arrives.
+
+3. Wait until RXNE flag is set
+   - RXNE = Receive data register not empty.
+   - Indicates a full frame (START + data + STOP) is received.
+   - Data is now safe to read.
+
+4. Read data from UART Data Register (DR)
+   - Retrieves the received byte.
+   - Clears RXNE flag automatically.
+   - Must be read to avoid overrun (ORE) error.
+
+5. Repeat steps 3–4 for more data
+   - Each received byte is independent.
+   - UART hardware handles framing for every byte.
+
+===============================================================================
+KEY IDEA:
+UART reception is asynchronous.
+The receiver detects the START bit automatically,
+samples data using the configured baud rate,
+and RXNE synchronizes software with received data.
+===============================================================================
+*/
