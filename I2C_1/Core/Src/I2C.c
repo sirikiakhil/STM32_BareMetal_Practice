@@ -83,7 +83,7 @@ void I2C_ByteRead(char slave_addr, char reg_addr, char* data )
 	// Clear ADDR flag by reading SR2
 	temp = I2C1->SR2;
 
-	// Send internal register address of slave
+	// Send internal register ,address of slave
 	I2C1->DR = reg_addr;
 
 	// Wait until data register empty
@@ -412,3 +412,59 @@ Each wait step synchronizes software with electrical bus states.
 Skipping ANY step may lock the I2C bus.
 */
 //*****************************************************************************************************************
+
+
+
+/******************************************************************************
+ * I2C ACKNOWLEDGEMENT WORKING
+ *
+ * I2C communication follows this packet format:
+ *
+ * START
+ *   |
+ *   |--> 7-bit Slave Address
+ *   |--> R/W Bit
+ *   |--> ACK (from Slave)
+ *   |--> Data Byte 1
+ *   |--> ACK (from Receiver)
+ *   |--> Data Byte 2
+ *   |--> ACK (from Receiver)
+ *   |--> ...
+ *   |
+ * STOP
+ *
+ * Every transmitted byte requires 9 clock pulses:
+ *   - First 8 clock pulses : Used to transfer 8 data bits.
+ *   - 9th clock pulse      : Used for ACK/NACK.
+ *
+ * During the first 8 clock pulses:
+ *   - Master generates the SCL clock.
+ *   - Master drives the SDA line and transmits the byte.
+ *
+ * After transmitting the 8th bit:
+ *   - The Master DOES NOT stop generating the clock.
+ *   - The Master releases the SDA line (High-Z/Open Drain).
+ *   - The Master generates ONE EXTRA (9th) clock pulse.
+ *
+ * During this 9th clock pulse:
+ *   - The Slave takes control of SDA.
+ *   - If the byte was received correctly, the Slave pulls SDA LOW (ACK).
+ *   - If the byte was not received or not accepted, the Slave leaves SDA HIGH
+ *     (NACK).
+ *
+ * The Master samples SDA while SCL is HIGH during the 9th clock:
+ *   SDA = LOW  --> ACK received.
+ *   SDA = HIGH --> NACK received.
+ *
+ * IMPORTANT:
+ * The Slave NEVER generates the ACK clock.
+ * The Master generates ALL clock pulses, including the ACK clock.
+ * The Slave only changes the SDA level during the 9th clock pulse.
+ *
+ * Therefore:
+ *   Master --> Controls SCL for the entire communication.
+ *   Master --> Controls SDA while transmitting data.
+ *   Slave  --> Controls SDA only during the ACK/NACK bit.
+ *
+ * This process repeats for every address byte and every data byte transferred.
+ ******************************************************************************/

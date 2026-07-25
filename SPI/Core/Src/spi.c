@@ -82,6 +82,13 @@ void spi1_config(void)
        - SPI internally assumes NSS = HIGH
        - Does NOT control any external pin
     */
+
+    // SSM = 1:
+    // We are not using hardware NSS control.(that means we are not going to configure the NSS GPIO pin to AF )
+    // The Chip Select (NSS/CS) line is controlled manually by our program
+    // (pull CS LOW before transmission and HIGH after transmission).
+    // SSI = 1 keeps the SPI master enabled internally and prevents Mode Fault.
+
     SPI1->CR1 |= (SPI_CR1_SSM);
     SPI1->CR1 |= (SPI_CR1_SSI);
 
@@ -151,7 +158,7 @@ void spi2_config(void)
 
     // CPOL and CPHA must match master
     SPI2->CR1 |= (SPI_CR1_CPOL);
-    SPI2->CR1 |= (SPI_CR1_CPHA);
+    SPI2->CR1 &= ~(SPI_CR1_CPHA);
 
     // MSB first
     SPI2->CR1 &= ~(SPI_CR1_LSBFIRST);
@@ -169,8 +176,13 @@ void spi2_config(void)
         - Works for learning / internal testing
     */
 
+    // SSM = 1:
+    // We are not using hardware NSS control.(that means we are not going to configure the NSS GPIO pin to AF )
+    // The Chip Select (NSS/CS) line is controlled manually by our program
+    // (pull CS LOW before transmission and HIGH after transmission).
+    // SSI = 0 their is no pysical connection of NSS , so putting ssi=0 , slave thinks like im already selected by master ( because internal NSS is LOW)
     SPI2->CR1 |= (SPI_CR1_SSM);
-    SPI2->CR1 |= (SPI_CR1_SSI);   // <<< CRITICAL
+    SPI2->CR1 &= ~(SPI_CR1_SSI);   // <<< CRITICAL
 
     // Enable SPI2
     SPI2->CR1 |= (SPI_CR1_SPE);
@@ -198,3 +210,133 @@ void cs_disable(void)
     */
     GPIOA->ODR |= (1U << 3);
 }
+
+
+
+/*=====================================================================
+ CASE 1 : STM32 (Master) <----> SPI Sensor (Software NSS) [Recommended]
+ ----------------------------------------------------------------------
+ SSM = 1  --> Software Slave Management Enabled
+ SSI = 1  --> Internal NSS kept HIGH (Prevents Mode Fault)
+      ---------------------------------------------------------------
+      Why SSI = 1 ?
+
+      When SSM = 1, the external NSS pin is ignored and the SPI uses
+      the internal NSS signal (SSI).
+
+      Setting SSI = 1 makes the SPI peripheral think that NSS is HIGH,
+      so the STM32 remains in Master mode.
+
+      If SSI = 0 while acting as Master, the SPI assumes NSS is LOW,
+      detects a Mode Fault (MODF), clears the MSTR bit, and disables
+      the SPI peripheral.
+
+     Therefore:
+       SSM = 1
+       SSI = 1
+
+     is the standard configuration for Software NSS in Master mode.
+    ---------------------------------------------------------------
+
+ Configure NSS pin as Normal GPIO Output (NOT Alternate Function).
+
+ Control CS manually:
+    CS LOW  --> Select Sensor
+    Transfer Data
+    CS HIGH --> Release Sensor
+
+ This is the most common method used in real embedded systems because
+ it gives complete control over the Chip Select timing.
+=====================================================================*/
+
+
+/*=====================================================================
+ CASE 2 : STM32 (Master) <----> SPI Sensor (Hardware NSS)
+ ----------------------------------------------------------------------
+ SSM = 0  --> Hardware Slave Management
+ SSI = X  --> Ignored
+
+ Configure NSS pin as Alternate Function (AF5).
+
+ Hardware automatically controls the NSS pin:
+    SPI Enabled  --> NSS LOW (Select Sensor)
+    Data Transfer
+    SPI Disabled --> NSS HIGH (Release Sensor)
+
+ Advantages:
+   - No manual CS control required.
+
+ Limitations:
+   - You cannot precisely control when NSS goes LOW or HIGH.
+   - Many SPI sensors require CS to remain LOW during an entire
+     command sequence (Command + Address + Data).
+
+ Therefore, most embedded engineers prefer Software NSS
+ (SSM = 1, SSI = 1) with a GPIO-controlled CS pin because it
+ provides complete control over chip-select timing and works
+ reliably with almost all SPI sensors.
+=====================================================================*/
+
+
+
+
+/*=====================================================================
+ CASE 3 : SPI Loopback (SPI1 Master <----> SPI2 Slave)
+          WITHOUT NSS Connection
+ ----------------------------------------------------------------------
+ Master:
+    SSM = 1
+    SSI = 1
+
+ Slave:
+    SSM = 1
+    SSI = 0
+
+ No physical NSS wire is required.
+ Both SPI peripherals manage NSS internally using the SSI bit.
+ This method is mainly used for learning and simple loopback testing.
+
+      ---------------------------------------------------------------
+      Why SSI = 0 in the Slave?
+
+     -Since there is no physical NSS connection, the slave uses the
+      SSI bit as its internal NSS signal.
+
+      SSI = 0 --> Internal NSS is LOW (Slave Selected)
+               Slave is enabled and ready to receive/transmit data.
+
+      SSI = 1 --> Internal NSS is HIGH (Slave Not Selected)
+               Slave ignores SPI communication.
+
+      -Therefore, for loopback without an NSS wire:
+         SSM = 1
+         SSI = 0
+
+      keeps the slave permanently selected.
+---------------------------------------------------------------
+=====================================================================*/
+
+
+
+
+/*=====================================================================
+ CASE 4 : SPI Loopback (SPI1 Master <----> SPI2 Slave)
+          WITH NSS Connection
+ ----------------------------------------------------------------------
+ Master NSS -----------> Slave NSS
+
+ Master:
+    SSM = 0
+
+ Slave:
+    SSM = 0
+
+ Configure both NSS pins as Alternate Function (AF5).
+
+ The hardware controls the NSS signal automatically.
+ This method demonstrates real SPI hardware behavior and is useful
+ for learning or applications that require hardware NSS.
+=====================================================================*/
+
+
+

@@ -52,7 +52,13 @@ static void EXTI_config(void)
 
 	//configuring EXTI13 to GPIOC13
 	SYSCFG->EXTICR[3] &= ~(15U << 4);
-	SYSCFG->EXTICR[3] |= (2U << 4);
+	SYSCFG->EXTICR[3] |= (2U << 4);  /*Reference Manual      C Array
+
+                                        names                but memory
+                                       EXTICR1  ---------->  EXTICR[0]
+                                       EXTICR2  ---------->  EXTICR[1]
+                                       EXTICR3  ---------->  EXTICR[2]
+                                       EXTICR4  ---------->  EXTICR[3] */
 
 	//Enabling the 13 line of EXTI
 	EXTI->IMR |= (1U << 13);

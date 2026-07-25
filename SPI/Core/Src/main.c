@@ -4,7 +4,6 @@
 
 /************************************************************/
 
-
 int main(void)
 {
 
@@ -18,7 +17,7 @@ int main(void)
 	spi1_gpio_config();
 	spi1_config();   //SPI1 as MASTER
 
-
+	gpio_config();
 
 	//Transmit data from SPI1 (MASTER)
 	uint8_t spi1_tx_data[3] = {0x77, 0x88, 0x99};
@@ -97,10 +96,6 @@ int main(void)
 }
 
 /************************************************************/
-
-
-
-
 
 
 

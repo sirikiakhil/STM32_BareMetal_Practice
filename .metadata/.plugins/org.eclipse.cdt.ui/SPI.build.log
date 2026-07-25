@@ -1,28 +1,10 @@
-19:58:31 **** Incremental Build of configuration Debug for project SPI ****
+09:35:55 **** Incremental Build of configuration Debug for project SPI ****
 make -j4 all 
-arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
-arm-none-eabi-gcc "../Core/Src/spi.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DUSE_HAL_DRIVER -DSTM32F446xx -c -I../Core/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc -I../Drivers/STM32F4xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32F4xx/Include -I../Drivers/CMSIS/Include -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Core/Src/spi.d" -MT"Core/Src/spi.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Core/Src/spi.o"
-../Core/Src/main.c: In function 'main':
-../Core/Src/main.c:30:26: warning: variable 'temp' set but not used [-Wunused-but-set-variable]
-   30 |         volatile uint8_t temp;
-      |                          ^~~~
-../Core/Src/main.c:28:17: warning: variable 'spi1_rx_data' set but not used [-Wunused-but-set-variable]
-   28 |         uint8_t spi1_rx_data;   //Dummy data received by SPI1 (MASTER)
-      |                 ^~~~~~~~~~~~
-../Core/Src/main.c:27:17: warning: variable 'spi2_rx_data' set but not used [-Wunused-but-set-variable]
-   27 |         uint8_t spi2_rx_data[3];   //Data received by SPI2 (SLAVE)
-      |                 ^~~~~~~~~~~~
-arm-none-eabi-gcc -o "SPI.elf" @"objects.list"   -mcpu=cortex-m4 -T"C:\Users\akhil\STM32_BareMetal_Practice\SPI\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="SPI.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
-Finished building target: SPI.elf
- 
 arm-none-eabi-size  SPI.elf 
-arm-none-eabi-objdump -h -S SPI.elf  > "SPI.list"
    text	   data	    bss	    dec	    hex	filename
-   1776	      4	   1572	   3352	    d18	SPI.elf
+   1992	      4	   1572	   3568	    df0	SPI.elf
 Finished building: default.size.stdout
  
-Finished building: SPI.list
- 
 
-19:58:32 Build Finished. 0 errors, 3 warnings. (took 1s.365ms)
+09:35:56 Build Finished. 0 errors, 0 warnings. (took 325ms)
 
